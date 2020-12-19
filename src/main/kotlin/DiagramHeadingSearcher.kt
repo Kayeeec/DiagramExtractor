@@ -47,6 +47,7 @@ fun searchPageForDiagramHeadings(document: PDDocument, page: Int): SearchedPage 
     stripper.sortByPosition = true
     stripper.startPage = page
     stripper.endPage = page
+    stripper.getText(document)
     return lineHits
 }
 
