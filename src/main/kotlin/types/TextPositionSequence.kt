@@ -1,3 +1,5 @@
+package types
+
 import org.apache.pdfbox.text.TextPosition
 
 class TextPositionSequence(
@@ -9,6 +11,9 @@ class TextPositionSequence(
 
     override val length: Int
         get() = this.end - this.start
+
+    val fontSize: Float?
+        get() = if (this.textPositions.isNotEmpty()) this.textPositionAt(0).fontSize else null
 
     /**
      * renamed from charAt
