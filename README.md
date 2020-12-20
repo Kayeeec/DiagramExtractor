@@ -15,7 +15,7 @@ Diagrams will be **extracted into `extracted_diagrams` folder** in the content r
 
 ### Problems with Batik dependency
 
-If there is a problem with Batik dependencies during build, just remove the last `batik-all` dependency from `pom.xml`, reload Maven and then add the dependency and reload Maven again. 
+If there is a problem with Batik dependencies during build, just remove the last `batik-all` dependency from `pom.xml`, reload Maven and then return the dependency and reload Maven again. 
 
 ```
 <dependency>
