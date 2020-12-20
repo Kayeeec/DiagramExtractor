@@ -3,9 +3,9 @@ package types
 import org.apache.pdfbox.text.TextPosition
 
 class TextPositionSequence(
-    var textPositions: List<TextPosition>,
-    var start:  Int,
-    var end: Int,
+    private var textPositions: List<TextPosition>,
+    private var start:  Int,
+    private var end: Int,
 ) : CharSequence {
     constructor(textPositions: List<TextPosition>): this(textPositions, 0, textPositions.size)
 
@@ -20,7 +20,7 @@ class TextPositionSequence(
      */
     override fun get(index: Int): Char {
         val text: String = textPositionAt(index).unicode
-        return text.get(0)
+        return text[0]
     }
 
     override fun subSequence(startIndex: Int, endIndex: Int): TextPositionSequence {
@@ -35,21 +35,10 @@ class TextPositionSequence(
         return builder.toString()
     }
 
-    fun textPositionAt(index: Int): TextPosition {
+    private fun textPositionAt(index: Int): TextPosition {
         return this.textPositions[this.start + index]
     }
 
-    fun getX(): Float {
-        return textPositions[start].xDirAdj
-    }
-
-    fun getY(): Float {
-        return textPositions[start].yDirAdj
-    }
-
-    fun getWidth(): Float {
-        val first = textPositions[start]
-        val last = textPositions[end]
-        return last.widthDirAdj + last.xDirAdj - first.xDirAdj
-    }
+    val yDirAdj: Float
+        get() = textPositions[start].yDirAdj
 }

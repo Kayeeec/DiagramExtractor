@@ -1,13 +1,18 @@
+import java.io.File
+
 fun main() {
     println("Extractor running...")
-//    val document = utils.DocumentLoader().document
-//    document.use { document ->
-//        val findLinesContainingWords = searchPageForDiagramHeadings(document, 1)
-//        print(findLinesContainingWords)
-//    }
-    val extractDiagrams = DiagramExtractor()
-    extractDiagrams.extractDiagrams()
+
+    val testFilesFolderPath = "test_files/"
+    val testFiles = File(testFilesFolderPath).list()
+    testFiles?.forEach {
+        val filePath = "${testFilesFolderPath}${it}"
+        print("   Extracting diagrams from $filePath...")
+        val extractor = DiagramExtractor(filePath)
+        extractor.extractDiagrams()
+        println(" done.")
+    }
+
     println("Extractor finished.")
 }
-
 

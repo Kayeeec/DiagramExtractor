@@ -10,14 +10,14 @@ import kotlin.math.abs
 // TODO: 20.12.20 save only the secondary start heading?
 
 class SearchedPage {
-    val lines: MutableList<MutableList<TextPositionSequence>> = mutableListOf()
+    private val lines: MutableList<MutableList<TextPositionSequence>> = mutableListOf()
     private val startHeaderLineHits: MutableSet<Int> = mutableSetOf()
     private val endHeaderLineHits: MutableSet<Int> = mutableSetOf()
     /* at most one */
-    val startHeaderLineNumbers: List<Int> //at least one for diagram page
+    private val startHeaderLineNumbers: List<Int> //at least one for diagram page
         get() = this.startHeaderLineHits.toList().sorted()
     /* at most one */
-    val endHeaderLineNumbers: List<Int> //at most one for diagram page
+    private val endHeaderLineNumbers: List<Int> //at most one for diagram page
         get() = this.endHeaderLineHits.toList().sorted()
 
     fun addLine(lineNumber: Int, sequence: TextPositionSequence) {
@@ -35,7 +35,7 @@ class SearchedPage {
             && fontSize != null && fontSize.equals(END_HEADER_FONT_SIZE)) this.endHeaderLineHits.add(lineNumber)
     }
 
-    val startHeaderLineNumber: Int? //there should be only one hit and it also should be always 0
+    private val startHeaderLineNumber: Int? //there should be only one hit and it also should be always 0
         get() = startHeaderLineNumbers.firstOrNull { lineId ->
             this.lines[lineId].isNotEmpty()
                     && this.lines[lineId + 1].isNotEmpty()
@@ -50,8 +50,16 @@ class SearchedPage {
         get() {
             if (!this.isDiagramPage) return null
             if (this.endHeaderLineHits.isEmpty()) return null // do not crop
-            val endHeaderY = lines[endHeaderLineNumbers[0]][0].getY()
-            val startHeaderY = lines[this.startHeaderLineNumber!! + 1][0].getY()
+            val endHeaderY = lines[endHeaderLineNumbers[0]][0].yDirAdj
+            val startHeaderY = lines[this.startHeaderLineNumber!! + 1][0].yDirAdj
             return abs(endHeaderY - startHeaderY)
+        }
+
+    val diagramName: String?
+        get() {
+            if (isDiagramPage) {
+                return this.lines[this.startHeaderLineNumber!!].joinToString(separator = " ") { it.toString() }.trim()
+            }
+            return null
         }
 }
