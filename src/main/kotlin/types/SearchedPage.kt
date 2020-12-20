@@ -7,6 +7,8 @@ import utils.START_HEADER
 import utils.START_HEADER_FONT_SIZE
 import kotlin.math.abs
 
+// TODO: 20.12.20 save only the secondary start heading?
+
 class SearchedPage {
     val lines: MutableList<MutableList<TextPositionSequence>> = mutableListOf()
     private val startHeaderLineHits: MutableSet<Int> = mutableSetOf()
