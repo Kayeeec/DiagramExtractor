@@ -5,6 +5,7 @@ import org.apache.pdfbox.pdfparser.PDFStreamParser
 import org.apache.pdfbox.pdfwriter.ContentStreamWriter
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
+import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.common.PDStream
 import types.SearchedPage
 import java.io.File
@@ -30,13 +31,14 @@ class DiagramExtractor(val fileName: String = "testPage.pdf") {
         return nums.map { COSInteger.get(it) }.toTypedArray()
     }
 
-    private fun getPrependTokens(): List<Any> {
+    private fun getPrependTokens(newHeight: Long?): List<Any> {
+        val X = newHeight?.plus(72/2) ?: 842
         val q = Operator.getOperator("q")
         val cm = Operator.getOperator("cm")
         val g = Operator.getOperator("g")
         return listOf(
             q,
-            *getCosIntegers(1, 0, 0, -1, 0, 842), cm,
+            *getCosIntegers(1, 0, 0, -1, 0, X), cm,
             q,
             *getCosIntegers(1, 0, 0, 1, 72, 0), cm,
             *getCosIntegers(0), g
@@ -44,14 +46,15 @@ class DiagramExtractor(val fileName: String = "testPage.pdf") {
     }
 
     private fun getAppendTokens(): List<Any> {
+        // TODO: 20.12.20 remove after testing on multiple diagrams
         val q = Operator.getOperator("q")
         val cm = Operator.getOperator("cm")
         val Q = Operator.getOperator("Q")
         return listOf(
             Q,
-            q,
-            *getCosIntegers(1, 0, 0, 1, 72, 770), cm,
-            Q,
+//            q,
+//            *getCosIntegers(1, 0, 0, 1, 72, 770), cm,
+//            Q,
             Q
         )
     }
@@ -63,7 +66,7 @@ class DiagramExtractor(val fileName: String = "testPage.pdf") {
      * read until first ET
      * then buffer diagram operators until next BT
      * create pdf page with the diagram operators
-     * crop it // todo
+     * crop it
      * convert it to svg/png //todo
      */
     private fun extractDiagram(dpage: DiagramPageResult) {
@@ -83,7 +86,7 @@ class DiagramExtractor(val fileName: String = "testPage.pdf") {
             val out = pdStream.createOutputStream()
             out.use {
                 val tokenWriter = ContentStreamWriter(it)
-                tokenWriter.writeTokens(getPrependTokens())
+                tokenWriter.writeTokens(getPrependTokens(dpage.searchedPage.diagramHeight?.toLong()))
                 while (!(token is Operator && (token as Operator).name == "BT")) {
                     tokenWriter.writeTokens(token)
                     token = pdfStreamParser.parseNextToken()
@@ -91,6 +94,7 @@ class DiagramExtractor(val fileName: String = "testPage.pdf") {
                 tokenWriter.writeTokens(getAppendTokens())
             }
             val page = templateDoc.getPage(0)
+            cropPage(page, dpage.searchedPage.diagramHeight)
             page.setContents(pdStream)
 
             // for now just save into a new doc and check //todo remove
@@ -103,6 +107,16 @@ class DiagramExtractor(val fileName: String = "testPage.pdf") {
             //convert page into svg/png
             // TODO: 19.12.20
         }
+    }
+
+    private fun cropPage(page: PDPage, diagramHeight: Float?) {
+        if (diagramHeight == null) return
+        val newHeight = diagramHeight + (72/2)
+        val width = page.mediaBox.width
+        val pdRectangle = PDRectangle(width, newHeight)
+        page.mediaBox = pdRectangle
+        page.bleedBox = pdRectangle
+        page.cropBox = pdRectangle
     }
 
     private fun loadDocument(): PDDocument {

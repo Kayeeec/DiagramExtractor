@@ -5,6 +5,7 @@ import utils.END_HEADER_FONT_SIZE
 import utils.NEXT_START_HEADER_FONT_SIZE
 import utils.START_HEADER
 import utils.START_HEADER_FONT_SIZE
+import kotlin.math.abs
 
 class SearchedPage {
     val lines: MutableList<MutableList<TextPositionSequence>> = mutableListOf()
@@ -42,4 +43,13 @@ class SearchedPage {
 
     val isDiagramPage: Boolean
         get() = this.startHeaderLineNumber != null
+
+    val diagramHeight: Float?
+        get() {
+            if (!this.isDiagramPage) return null
+            if (this.endHeaderLineHits.isEmpty()) return null // do not crop
+            val endHeaderY = lines[endHeaderLineNumbers[0]][0].getY()
+            val startHeaderY = lines[this.startHeaderLineNumber!! + 1][0].getY()
+            return abs(endHeaderY - startHeaderY)
+        }
 }
